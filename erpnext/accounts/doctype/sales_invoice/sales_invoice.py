@@ -45,7 +45,6 @@ from erpnext.assets.doctype.asset.depreciation import (
 from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
-from erpnext.pre_submit_validation.sales_invoice import run as pre_submit_validation_run
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
@@ -389,8 +388,6 @@ class SalesInvoice(SellingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.validate_subcontracted_sales_order()
 		self.validate_scio_self_rm_qty()
-		if frappe.get_cached_value("Accounts Settings", None, "preview_mode"):
-			pre_submit_validation_run(self)
 
 	def validate_accounts(self):
 		self.validate_write_off_account()
