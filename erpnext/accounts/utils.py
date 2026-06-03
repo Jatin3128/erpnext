@@ -44,6 +44,8 @@ from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.utils import get_combine_datetime, get_stock_value_on
 
 if TYPE_CHECKING:
+	from frappe.model.document import Document
+
 	from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import RepostItemValuation
 
 
@@ -2839,3 +2841,29 @@ def _check_packed_qty_warn(doc):
 			title=_("Pre-Submit Warning: Packed Qty"),
 			indicator="orange",
 		)
+
+
+def update_subscription_on_invoice_update(doc: "Document", method: str | None = None) -> None:
+	if doc.get("subscription"):
+		refresh_subscription_status(doc.subscription)
+
+
+def update_subscriptions_on_payment(doc: "Document", method: str | None = None) -> None:
+	subscriptions = set()
+	for reference in doc.get("references", []):
+		if reference.reference_doctype not in ("Sales Invoice", "Purchase Invoice"):
+			continue
+		subscription = frappe.db.get_value(
+			reference.reference_doctype, reference.reference_name, "subscription"
+		)
+		if subscription:
+			subscriptions.add(subscription)
+
+	for subscription in subscriptions:
+		refresh_subscription_status(subscription)
+
+
+def refresh_subscription_status(name: str) -> None:
+	subscription = frappe.get_doc("Subscription", name)
+	subscription.set_subscription_status()
+	subscription.save(ignore_permissions=True)
