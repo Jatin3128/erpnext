@@ -460,8 +460,13 @@ class SalesInvoice(SellingController):
 			validate_account_head(item.idx, item.income_account, self.company, _("Income"))
 
 	def before_save(self):
+<<<<<<< HEAD
 		self.set_account_for_mode_of_payment()
 		self.set_paid_amount()
+=======
+		POSService(self).update_paid_amount()
+		POSService(self).set_account_for_mode_of_payment()
+>>>>>>> 322d4dff25 (fix: clear stale payment rows on non-POS returns so they don't surface in bank reconciliation (#55903))
 
 	def before_submit(self):
 		self.add_remarks()
