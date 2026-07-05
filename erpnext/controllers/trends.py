@@ -56,10 +56,10 @@ def validate_filters(filters):
 			frappe.throw(_("{0} is mandatory").format(_(f)))
 
 	if not frappe.db.exists("Fiscal Year", filters.get("fiscal_year")):
-		frappe.throw(_("Fiscal Year {0} Does Not Exist").format(filters.get("fiscal_year")))
+		frappe.throw(_("Fiscal Year {0} does not exist").format(filters.get("fiscal_year")))
 
 	if filters.get("based_on") == filters.get("group_by"):
-		frappe.throw(_("'Based On' and 'Group By' can not be same"))
+		frappe.throw(_("'Based On' and 'Group By' can not be the same"))
 
 	if filters.get("period_based_on") and filters.period_based_on not in ["bill_date", "posting_date"]:
 		frappe.throw(
@@ -202,6 +202,9 @@ def get_data(filters, conditions):
 					(filters.get("company"), year_start_date, year_end_date, row[i][0], data1[d][0]),
 					as_list=1,
 				)
+
+				if not row1:
+					continue
 
 				des[ind] = row[i][0]
 				des[ind - 1] = row1[0][0]
