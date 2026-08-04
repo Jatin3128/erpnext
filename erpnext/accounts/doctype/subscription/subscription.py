@@ -655,6 +655,11 @@ class Subscription(Document):
 		1. `process_for_active`
 		2. `process_for_past_due`
 		"""
+		# Snapshot before update_subscription_period() below can roll this forward,
+		# so the cancel_at_period_end check further down still targets the period
+		# that just ended, not the next one.
+		current_period_end = self.next_billing_period_end
+
 		if not self.is_current_invoice_generated(
 			self.next_billing_period_start, self.next_billing_period_end
 		) and self.can_generate_new_invoice(posting_date):
@@ -675,7 +680,7 @@ class Subscription(Document):
 			self.update_subscription_period()
 
 		if self.cancel_at_period_end and (
-			getdate(posting_date) >= getdate(self.next_billing_period_end)
+			getdate(posting_date) >= getdate(current_period_end)
 			or (self.end_date and getdate(posting_date) >= getdate(self.end_date))
 		):
 			self.cancel_subscription()
